@@ -1,5 +1,5 @@
-const STATIC_CACHE_NAME = 'static-cache-v1';
-const DATA_CACHE_NAME = 'data-cache-v1';
+const STATIC_CACHE = 'static-cache-v1';
+const RUNTIME_CACHE = 'data-cache-v1';
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
@@ -14,19 +14,18 @@ const FILES_TO_CACHE = [
 self.addEventListener('install', event => {
 
   // precache transaction data
-  event.waitUntil(
-    caches.open(DATA_CACHE_NAME)
-      .then(cache => cache.add("/api/transaction"))
-  );
+  // event.waitUntil(
+  //   caches.open(RUNTIME_CACHE)
+  //     .then(cache => cache.add("/api/transaction"))
+  // );
 
   // precache static assets
   event.waitUntil(
-    caches.open(STATIC_CACHE_NAME)
+    caches
+      .open(STATIC_CACHE)
       .then(cache => cache.addAll(FILES_TO_CACHE))
+      .then(() => self.skipWaiting())
   );
-
-  // move to activate
-  self.skipWaiting();
 });
 
 // activate event
