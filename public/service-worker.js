@@ -13,6 +13,22 @@ const FILES_TO_CACHE = [
 // install event
 self.addEventListener('install', event => {
 
+  // precache transaction data
+  event.waitUntil(
+    caches
+      .open(DATA_CACHE_NAME)
+      .then(cache => cache.add("/api/transaction"))
+  );
+
+  // precache static assets
+  event.waitUntil(
+    caches
+      .open(STATIC_CACHE_NAME)
+      .then((cache) => cache.addAll(FILES_TO_CACHE))
+  );
+
+  // move to activate
+  self.skipWaiting();
 });
 
 // activate event
