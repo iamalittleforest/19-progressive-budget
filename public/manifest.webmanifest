@@ -1,0 +1,22 @@
+{
+  "name": "Progressive Budget App",
+  "short_name": "Budget App",
+  "description": "An application that allows a user to add expenses and deposits to their budget.",
+  "icons": [
+    {
+      "src": "public/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "public/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#50327c",
+  "theme_color": "#ffffff"
+}
