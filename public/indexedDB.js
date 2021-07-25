@@ -36,7 +36,7 @@ request.onsuccess = event => {
 
 // error
 request.onerror = event => {
-
+  console.log(`Request error: ${event.target.errorCode}`);
 };
 
 // check database for transactions
