@@ -24,7 +24,14 @@ request.onupgradeneeded = event => {
 
 // success
 request.onsuccess = event => {
+  console.log('Request successful!');
+  db = event.target.result;
 
+  // run checkDatabase if app is online
+  if (navigator.onLine) {
+    console.log('App Online!');
+    checkDatabase();
+  }
 };
 
 // error
