@@ -2,12 +2,24 @@
 let db;
 let budgetVersion;
 
-// request for budgetdb database.
+// create budgetdb database
 const request = indexedDB.open('budgetdb', budgetVersion || 1);
 
-// upgrade needed
+// upgrade needed (or no database exists)
 request.onupgradeneeded = event => {
 
+  // version is outdated
+  const oldVersion = event;
+  const newVersion = event.newVersion || db.version;
+  console.log(`DB updated from version ${oldVersion} to ${newVersion}`);
+
+  db = event.target.result;
+
+  // create Transaction object store
+  if (db.objectStoreNames.length === 0) {
+    db.createObjectStore('transactions', { autoIncrement: true });
+    console.log('Transactions created!')
+  }
 };
 
 // success
