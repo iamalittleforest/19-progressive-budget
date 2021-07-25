@@ -30,7 +30,7 @@ self.addEventListener('install', event => {
 
 // activate event
 self.addEventListener('activate', event => {
-  
+
   // remove old caches
   const currentCaches = [STATIC_CACHE, RUNTIME_CACHE];
   event.waitUntil(
@@ -55,4 +55,69 @@ self.addEventListener('activate', event => {
 // fetch event
 self.addEventListener('fetch', event => {
 
+  // does not cache non GET requests or requests to other origins
+  if (
+    event.request.method !== "GET" ||
+    !event.request.url.startsWith(self.location.origin)
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // cache requests to api
+  if (event.request.url.includes("/api/transaction")) {
+    event.respondWith(
+      caches
+        .open(RUNTIME_CACHE)
+        .then(cache => {
+          return fetch(event.request)
+
+            // clone if response is sucessful
+            .then(response => {
+              if (response.status === 200) {
+                cache.put(event.request, response.clone());
+              }
+              return response;
+            })
+
+            // get from cache if response is unsuccessful
+            .catch(err => cache.match(event.request));
+        })
+        .catch(err => console.log(err))
+    );
+    return;
+  }
+
+  // use cached response first 
+  event.respondWith(
+    caches
+      .match(event.request)
+      .then(cachedResponse => {
+
+        // use cached response if request is in cache
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        // fetch and cache response if request is not in cache
+        return caches
+          .open(RUNTIME_CACHE)
+          .then(cache => {
+            return fetch(event.request)
+
+              // clone if response is sucessful
+              .then(response => {
+                if (response.status === 200) {
+                  cache.put(event.request, response.clone());
+                }
+                return response;
+              })
+
+              // get from cache if response is unsuccessful
+              .catch(err => cache.match(event.request));
+          })
+          .catch(err => console.log(err))
+      })
+      .catch(err => console.log(err))
+  );
 });
