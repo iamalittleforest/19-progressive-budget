@@ -56,13 +56,13 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
 
   // does not cache non GET requests or requests to other origins
-  if (
-    event.request.method !== "GET" ||
-    !event.request.url.startsWith(self.location.origin)
-  ) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
+  // if (
+  //   event.request.method !== "GET" ||
+  //   !event.request.url.startsWith(self.location.origin)
+  // ) {
+  //   event.respondWith(fetch(event.request));
+  //   return;
+  // }
 
   // cache requests to api
   if (event.request.url.includes("/api/transaction")) {
