@@ -15,7 +15,7 @@ request.onupgradeneeded = event => {
 
   db = event.target.result;
 
-  // create Transaction object store
+  // create object store
   if (db.objectStoreNames.length === 0) {
     db.createObjectStore('transactions', { autoIncrement: true });
     console.log('Transactions created!')
@@ -39,14 +39,57 @@ request.onerror = event => {
   console.log(`Request error: ${event.target.errorCode}`);
 };
 
-// check database for transactions
+// check database for records
 function checkDatabase() {
 
+  // open transaction to access object store
+  let transaction = db.transaction(['transactions'], 'readwrite');
+  const store = transaction.objectStore('transactions');
+
+  // get all records
+  const getAll = store.getAll();
+
+  // success
+  getAll.onsuccess = () => {
+
+    // fetch records from api if records are present
+    if (getAll.result.length > 0) {
+      fetch('/api/transaction/bulk', {
+        method: 'POST',
+        body: JSON.stringify(getAll.result),
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(response => {
+          
+          // clear records if returned response is not empty
+          if (response.length !== 0) {
+            
+            // open transaction to access object store
+            transaction = db.transaction(['transactions'], 'readwrite');
+            const currentStore = transaction.objectStore('transactions');
+
+            // clear existing records
+            currentStore.clear();
+            console.log('Clearing store');
+          }
+        });
+    }
+  };
 }
 
-// add transaction to budget db
+// add record to object store
 const saveRecord = record => {
 
+  // open transaction to access object store
+  const transaction = db.transaction(['transactions'], 'readwrite');
+  const store = transaction.objectStore('transactions');
+
+  // add record
+  store.add(record);
 };
 
 // listen for online status
