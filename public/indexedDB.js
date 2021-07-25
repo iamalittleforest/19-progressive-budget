@@ -1,28 +1,22 @@
 // define global variables
 let db;
-let budgetVersion;
 
 // create budgetdb database
-const request = indexedDB.open('budgetdb', budgetVersion || 1);
+const request = indexedDB.open('budgetdb', 1);
 
-// upgrade needed (or no database exists)
+// if upgrade needed (or no database exists)
 request.onupgradeneeded = event => {
-
-  // version is outdated
-  const oldVersion = event;
-  const newVersion = event.newVersion || db.version;
-  console.log(`DB updated from version ${oldVersion} to ${newVersion}`);
-
+  console.log('Upgrade needed');
   db = event.target.result;
 
   // create object store
   if (db.objectStoreNames.length === 0) {
     db.createObjectStore('transactions', { autoIncrement: true });
-    console.log('Transactions created!')
+    console.log('Object Store created!')
   }
 };
 
-// success
+// if success
 request.onsuccess = event => {
   console.log('Request successful!');
   db = event.target.result;
@@ -34,7 +28,7 @@ request.onsuccess = event => {
   }
 };
 
-// error
+// if error
 request.onerror = event => {
   console.log(`Request error: ${event.target.errorCode}`);
 };
@@ -44,12 +38,12 @@ function checkDatabase() {
 
   // open transaction to access object store
   let transaction = db.transaction(['transactions'], 'readwrite');
-  const store = transaction.objectStore('transactions');
+  const objectStore = transaction.objectStore('transactions');
 
   // get all records
-  const getAll = store.getAll();
+  const getAll = objectStore.getAll();
 
-  // success
+  // if success
   getAll.onsuccess = () => {
 
     // fetch records from api if records are present
@@ -65,7 +59,7 @@ function checkDatabase() {
         .then(response => response.json())
         .then(response => {
           
-          // clear records if returned response is not empty
+          // clear records after fetch
           if (response.length !== 0) {
             
             // open transaction to access object store
@@ -74,10 +68,15 @@ function checkDatabase() {
 
             // clear existing records
             currentStore.clear();
-            console.log('Clearing store');
+            console.log('IndexedDB cleared!');
           }
         });
     }
+  };
+
+  // if error
+  getAll.onerror = () => {
+    console.log(`Request error: ${target.errorCode}`);
   };
 }
 
@@ -86,10 +85,11 @@ const saveRecord = record => {
 
   // open transaction to access object store
   const transaction = db.transaction(['transactions'], 'readwrite');
-  const store = transaction.objectStore('transactions');
+  const objectStore = transaction.objectStore('transactions');
 
   // add record
-  store.add(record);
+  objectStore.add(record);
+  console.log('Record Added!');
 };
 
 // listen for online status
