@@ -83,7 +83,7 @@ self.addEventListener('fetch', event => {
   // cached static files 
   event.respondWith(
     caches
-      .open(CACHE_NAME)
+      .open(STATIC_CACHE)
       .then(cache => {
         return cache
           .match(event.request)
